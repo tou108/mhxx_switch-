@@ -158,7 +158,7 @@ class SysDVRTcpReceiver(
                 continue
             }
 
-            if ((flags and FLAG_IS_VIDEO) == 0.toByte()) {
+            if ((flags.toInt() and FLAG_IS_VIDEO.toInt()) == 0) {
                 // Audio or other - skip
                 skipExact(ins, dataSize)
                 continue
@@ -167,7 +167,7 @@ class SysDVRTcpReceiver(
             val payload = readExact(ins, dataSize)
             val tsUs = timestampNs / 1000L
 
-            onPacket(VideoPacket(payload, tsUs, (flags and FLAG_IS_MULTI_NAL) != 0.toByte()))
+            onPacket(VideoPacket(payload, tsUs, (flags.toInt() and FLAG_IS_MULTI_NAL.toInt()) != 0))
         }
     }
 
