@@ -68,9 +68,15 @@ class SysDVRRecorder(private val outputFile: File) {
         if (!isStarted) return
         val m = muxer ?: return
 
+        // BUG FIX②: Switch から来るタイムスタンプが 0 や同一値の場合、
+        // MediaMuxer が duration を設定できず0秒動画になる。
+        // システムクロック(nanoTime)をベースにしたタイムスタンプにフォールバックする。
+        val nowUs = System.nanoTime() / 1000L
+        val effectiveTs = if (timestampUs > 0L) timestampUs else nowUs
+
         // Normalize timestamps to start from 0
-        if (firstTimestampUs < 0) firstTimestampUs = timestampUs
-        val relativeUs = (timestampUs - firstTimestampUs).coerceAtLeast(0)
+        if (firstTimestampUs < 0) firstTimestampUs = effectiveTs
+        val relativeUs = (effectiveTs - firstTimestampUs).coerceAtLeast(0)
 
         val info = MediaCodec.BufferInfo().apply {
             offset = 0
