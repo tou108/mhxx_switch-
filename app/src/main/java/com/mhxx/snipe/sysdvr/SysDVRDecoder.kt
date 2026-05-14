@@ -39,7 +39,7 @@ class SysDVRDecoder(
                 setByteBuffer("csd-0", ByteBuffer.wrap(SWITCH_SPS))
                 setByteBuffer("csd-1", ByteBuffer.wrap(SWITCH_PPS))
                 setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 0x54000 + 64)
-                setFloat(MediaFormat.KEY_FRAME_RATE, 30f)
+                setFloat(MediaFormat.KEY_FRAME_RATE, 120f)
                 setInteger(MediaFormat.KEY_COLOR_FORMAT,
                     android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
             }
