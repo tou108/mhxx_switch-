@@ -263,6 +263,9 @@ class SysDVRCaptureActivity : AppCompatActivity(), SurfaceHolder.Callback {
         isRecordingActive = false
 
         macroSession.stopRecording()
+
+        // BUG FIX①: recorder を null にする前に outputPath を保存する
+        val savedOutputPath = recorder?.outputPath
         recorder?.stop()
         recorder = null
 
@@ -289,10 +292,15 @@ class SysDVRCaptureActivity : AppCompatActivity(), SurfaceHolder.Callback {
                 android.content.res.ColorStateList.valueOf(0xFF20c997.toInt())
         }
 
-        // Notify media scanner
-        recorder?.let {
-            sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
-                Uri.fromFile(File(it.outputPath))))
+        // BUG FIX①: savedOutputPath を使って Media Scanner に通知 (recorder はすでに null)
+        // API 29+ では MediaScannerConnection を使う (ACTION_MEDIA_SCANNER_SCAN_FILE は deprecated)
+        if (savedOutputPath != null) {
+            android.media.MediaScannerConnection.scanFile(
+                this,
+                arrayOf(savedOutputPath),
+                arrayOf("video/mp4"),
+                null
+            )
         }
     }
 
