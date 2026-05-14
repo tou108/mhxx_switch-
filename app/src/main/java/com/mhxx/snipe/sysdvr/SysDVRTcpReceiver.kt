@@ -52,7 +52,8 @@ class SysDVRTcpReceiver(
     private val host: String,
     private val onPacket: (VideoPacket) -> Unit,
     private val onError: (String) -> Unit,
-    private val onConnected: () -> Unit
+    private val onConnected: () -> Unit,
+    private val onAudioPacket: ((ByteArray) -> Unit)? = null   // ← 音声コールバック追加
 ) {
     private var socket: Socket? = null
     private var job: Job? = null
@@ -159,8 +160,13 @@ class SysDVRTcpReceiver(
             }
 
             if ((flags.toInt() and FLAG_IS_VIDEO.toInt()) == 0) {
-                // Audio or other - skip
-                skipExact(ins, dataSize)
+                // 音声パケット → コールバックがあれば渡す、なければスキップ
+                if (onAudioPacket != null && (flags.toInt() and FLAG_IS_AUDIO.toInt()) != 0) {
+                    val audioPayload = readExact(ins, dataSize)
+                    onAudioPacket.invoke(audioPayload)
+                } else {
+                    skipExact(ins, dataSize)
+                }
                 continue
             }
 

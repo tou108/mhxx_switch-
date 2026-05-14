@@ -51,6 +51,7 @@ class SysDVRCaptureActivity : AppCompatActivity(), SurfaceHolder.Callback {
     private var decoder: SysDVRDecoder? = null
     private var tcpReceiver: SysDVRTcpReceiver? = null
     private var recorder: SysDVRRecorder? = null
+    private var audioPlayer: SysDVRAudioPlayer? = null   // ← 音声プレイヤー追加
     private var macroSession = MacroSession()
     private var controller: SysBotBaseController? = null
 
@@ -176,6 +177,9 @@ class SysDVRCaptureActivity : AppCompatActivity(), SurfaceHolder.Callback {
         }
         decoder!!.start()
 
+        // 音声プレイヤー起動
+        audioPlayer = SysDVRAudioPlayer().also { it.start() }
+
         tcpReceiver = SysDVRTcpReceiver(
             host = host,
             onPacket = { packet ->
@@ -195,6 +199,10 @@ class SysDVRCaptureActivity : AppCompatActivity(), SurfaceHolder.Callback {
                     tvStatus.text = "エラー: $msg"
                     tvStatus.setTextColor(0xFFdc3545.toInt())
                 }
+            },
+            onAudioPacket = { pcmData ->
+                // 受信した PCM を AudioTrack に流す
+                audioPlayer?.write(pcmData)
             }
         )
         tcpReceiver!!.start()
@@ -212,6 +220,8 @@ class SysDVRCaptureActivity : AppCompatActivity(), SurfaceHolder.Callback {
         tcpReceiver = null
         decoder?.stop()
         decoder = null
+        audioPlayer?.stop()
+        audioPlayer = null
     }
 
     // ── Recording ────────────────────────────────────────────────────────
