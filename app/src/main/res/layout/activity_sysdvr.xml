@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0b0c10">
+
+    <!-- Video SurfaceView (16:9 centered) -->
+    <SurfaceView
+        android:id="@+id/surfaceView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center" />
+
+    <!-- Top status bar overlay -->
+    <LinearLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:background="#CC0b0c10"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="8dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📺 画面キャプチャ"
+            android:textColor="#c8922b"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvFps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="-- fps"
+            android:textColor="#9a9080"
+            android:textSize="11sp"
+            android:fontFamily="monospace"
+            android:layout_marginEnd="12dp" />
+
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="接続中..."
+            android:textColor="#e0a800"
+            android:textSize="11sp" />
+
+    </LinearLayout>
+
+    <!-- Bottom control bar overlay -->
+    <LinearLayout
+        android:id="@+id/bottomBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="#CC0b0c10"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <!-- Recording indicator -->
+        <LinearLayout
+            android:id="@+id/recordingIndicator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone">
+
+            <View
+                android:id="@+id/recDot"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="#dc3545"
+                android:layout_marginEnd="6dp" />
+
+            <TextView
+                android:id="@+id/tvRecTime"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="● REC  00:00"
+                android:textColor="#dc3545"
+                android:textSize="12sp"
+                android:fontFamily="monospace"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvRecFile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#6a6058"
+                android:textSize="10sp"
+                android:maxLines="1"
+                android:ellipsize="middle" />
+
+        </LinearLayout>
+
+        <!-- Replay progress -->
+        <LinearLayout
+            android:id="@+id/replayIndicator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="▶ リプレイ中"
+                android:textColor="#20c997"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvReplayProgress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#9a9080"
+                android:textSize="11sp"
+                android:fontFamily="monospace" />
+
+        </LinearLayout>
+
+        <!-- Main button row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:weightSum="5">
+
+            <!-- Stop capture -->
+            <Button
+                android:id="@+id/btnStop"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginHorizontal="3dp"
+                android:text="■ 停止"
+                android:textSize="11sp"
+                android:textColor="#fff"
+                android:backgroundTint="#dc3545"
+                android:paddingHorizontal="4dp" />
+
+            <!-- Start/Stop recording -->
+            <Button
+                android:id="@+id/btnRecord"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginHorizontal="3dp"
+                android:text="⏺ 録画"
+                android:textSize="11sp"
+                android:textColor="#fff"
+                android:backgroundTint="#252830"
+                android:paddingHorizontal="4dp" />
+
+            <!-- Import video (pick from storage) -->
+            <Button
+                android:id="@+id/btnImport"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginHorizontal="3dp"
+                android:text="📂 読込"
+                android:textSize="11sp"
+                android:textColor="#fff"
+                android:backgroundTint="#252830"
+                android:paddingHorizontal="4dp" />
+
+            <!-- Replay last session -->
+            <Button
+                android:id="@+id/btnReplay"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginHorizontal="3dp"
+                android:text="▶ 再生"
+                android:textSize="11sp"
+                android:textColor="#fff"
+                android:backgroundTint="#252830"
+                android:paddingHorizontal="4dp"
+                android:enabled="false" />
+
+            <!-- Fullscreen toggle -->
+            <Button
+                android:id="@+id/btnFullscreen"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginHorizontal="3dp"
+                android:text="⛶"
+                android:textSize="14sp"
+                android:textColor="#9a9080"
+                android:backgroundTint="#252830"
+                android:paddingHorizontal="4dp" />
+
+        </LinearLayout>
+
+        <!-- File info row -->
+        <TextView
+            android:id="@+id/tvFileInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#6a6058"
+            android:textSize="10sp"
+            android:layout_marginTop="6dp"
+            android:gravity="center"
+            android:text="録画ファイルは /Movies/SysDVR/ に保存されます" />
+
+    </LinearLayout>
+
+</FrameLayout>

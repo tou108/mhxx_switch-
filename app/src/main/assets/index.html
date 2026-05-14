@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MHXX Switch操作</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0b0c10;--panel:#12141a;--panel2:#181a22;--border:#252830;--border2:#2e3240;
+  --gold:#c8922b;--gold2:#e8b84a;--gold-dim:#8a6320;
+  --text:#d4cbbf;--text2:#9a9080;--text3:#6a6058;
+  --accent:#4a7faa;--accent2:#6090bb;
+  --green:#28a745;--red:#dc3545;--yellow:#e0a800;--teal:#20c997;
+  --purple:#9b59b6;--purple2:#b07fd8;
+  --bt-blue:#2979ff;--bt-green:#00e676;
+  --font:'Noto Sans JP',sans-serif;--font-en:'Rajdhani',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;
+  display:flex;flex-direction:column;}
+
+/* ── HEADER ── */
+.app-header{
+  background:linear-gradient(90deg,#0d0e13,#181a24,#0d0e13);
+  border-bottom:1px solid var(--gold-dim);
+  height:50px;display:flex;align-items:center;padding:0 14px;gap:8px;flex-shrink:0;
+  box-shadow:0 2px 12px rgba(200,146,43,0.15);
+}
+.app-header h1{
+  font-family:var(--font-en);font-size:1.3rem;letter-spacing:2px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.app-header .sub{color:var(--text3);font-size:10px;}
+.bt-dot{width:9px;height:9px;border-radius:50%;background:#555;margin-left:auto;transition:background .3s;}
+.bt-dot.connecting{background:var(--yellow);animation:blink .6s infinite;}
+.bt-dot.connected{background:var(--bt-green);}
+.bt-dot.error{background:var(--red);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── MAIN TABS ── */
+.main-tabs{
+  display:flex;border-bottom:2px solid var(--border);
+  background:var(--panel);flex-shrink:0;
+}
+.main-tab{
+  flex:1;padding:9px 4px;text-align:center;font-size:11px;cursor:pointer;
+  border-right:1px solid var(--border);color:var(--text2);
+  transition:all 0.15s;font-weight:600;letter-spacing:.5px;
+}
+.main-tab:last-child{border-right:none;}
+.main-tab:hover{background:var(--panel2);color:var(--text);}
+.main-tab.active{background:var(--panel2);color:var(--gold);border-bottom:2px solid var(--gold);}
+.main-tab.active.tab-reset{color:#ff6b6b;border-bottom-color:#ff6b6b;}
+.main-tab.active.tab-snipe{color:var(--teal);border-bottom-color:var(--teal);}
+.main-tab.active.tab-capture{color:var(--teal);border-bottom-color:var(--teal);}
+
+/* ── TAB PAGES ── */
+.tab-page{display:none;flex:1;overflow:hidden;flex-direction:column;}
+.tab-page.active{display:flex;}
+
+/* ── SCROLL WRAP ── */
+.scroll-wrap{flex:1;overflow-y:auto;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:var(--panel);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* ── SECTION TITLE ── */
+.sec-title{
+  font-size:11px;font-weight:700;letter-spacing:2px;color:var(--gold);text-transform:uppercase;
+  margin-bottom:10px;display:flex;align-items:center;gap:6px;
+}
+.sec-title::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;}
+.sec-title.blue{color:var(--bt-blue);}
+.sec-title.blue::before{background:var(--bt-blue);}
+.sec-title.red{color:#ff6b6b;}
+.sec-title.red::before{background:#ff6b6b;}
+.sec-title.teal{color:var(--teal);}
+.sec-title.teal::before{background:var(--teal);}
+.sec-title.green{color:var(--green);}
+.sec-title.green::before{background:var(--green);}
+
+/* ── PANELS ── */
+.panel-block{padding:14px;border-bottom:1px solid var(--border);}
+
+/* ── BT STATUS ── */
+.bt-status-card{
+  background:var(--panel2);border:1px solid var(--border2);border-radius:6px;
+  padding:12px;margin-bottom:12px;
+}
+.bt-status-row{display:flex;align-items:center;gap:10px;}
+.bt-status-icon{font-size:1.8rem;}
+.bt-status-info .label{font-size:10px;color:var(--text3);letter-spacing:1px;}
+.bt-status-info .val{font-size:14px;font-weight:700;color:var(--text);}
+.bt-status-info .mac{font-size:11px;color:var(--accent2);font-family:monospace;}
+
+.mac-input-row{display:flex;gap:8px;margin-bottom:10px;}
+.mac-input{
+  flex:1;background:var(--panel2);border:1px solid var(--border2);color:var(--text);
+  border-radius:4px;padding:8px 10px;font-size:13px;font-family:monospace;letter-spacing:1px;
+}
+.mac-input:focus{outline:none;border-color:var(--bt-blue);}
+.mac-input::placeholder{color:var(--text3);}
+
+/* ── BUTTONS ── */
+.btn{
+  padding:9px 16px;border:none;border-radius:4px;font-size:12px;cursor:pointer;
+  font-family:var(--font);font-weight:600;transition:all .15s;letter-spacing:.5px;
+}
+.btn-blue{background:var(--bt-blue);color:#fff;}
+.btn-blue:hover{background:#5393ff;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-green:hover{background:#34d058;}
+.btn-orange{background:#e67e22;color:#fff;}
+.btn-orange:hover{background:#f39c12;}
+.btn-sm{padding:5px 10px;font-size:11px;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* ── FORM ELEMENTS ── */
+select,input[type="number"],input[type="text"],textarea{
+  background:var(--panel2);border:1px solid var(--border2);color:var(--text);
+  border-radius:4px;padding:6px 8px;font-size:12px;font-family:var(--font);
+}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--gold-dim);}
+label{font-size:11px;color:var(--text2);}
+
+/* ── RESET MARA SPECIFIC ── */
+.auto-config-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;
+}
+.config-item label{
+  display:block;font-size:10px;color:var(--text3);letter-spacing:1px;
+  text-transform:uppercase;margin-bottom:4px;
+}
+.config-item input[type="number"]{
+  width:100%;padding:8px;font-size:15px;font-weight:700;
+  text-align:center;border:1px solid var(--border2);border-radius:4px;
+}
+.config-item input[type="number"]:focus{border-color:#ff6b6b;}
+
+/* Timer box */
+.timer-box{
+  background:var(--panel2);border:1px solid var(--border2);border-radius:8px;
+  padding:16px;margin-bottom:14px;text-align:center;
+  transition:border-color .3s,box-shadow .3s;
+}
+.timer-box.active{
+  border-color:#ff6b6b;
+  box-shadow:0 0 16px rgba(255,107,107,0.2);
+}
+.timer-label{font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+.timer-value{
+  font-family:var(--font-en);font-size:3.2rem;font-weight:700;letter-spacing:4px;
+  color:var(--text2);transition:color .3s;
+}
+.timer-value.counting{color:#ff6b6b;animation:pulse .5s ease-in-out infinite alternate;}
+.timer-value.done{color:var(--green);}
+@keyframes pulse{from{opacity:1;}to{opacity:.6;}}
+
+/* Step progress */
+.step-list{margin-bottom:14px;}
+.step-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 12px;border-radius:4px;margin-bottom:4px;
+  background:var(--panel2);border:1px solid var(--border);
+  transition:all .2s;font-size:12px;color:var(--text2);
+}
+.step-item.active{
+  background:#1a1e2e;border-color:#ff6b6b;color:var(--text);
+}
+.step-item.done{
+  background:#0e1a12;border-color:#1e5228;color:#4caf50;
+}
+.step-item.waiting{
+  background:#1a1510;border-color:#8a6320;color:var(--gold);
+  animation:stepPulse 1s ease-in-out infinite alternate;
+}
+@keyframes stepPulse{from{border-color:#8a6320;}to{border-color:var(--gold2);}}
+.step-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--border2);flex-shrink:0;transition:background .2s;
+}
+.step-item.active .step-dot{background:#ff6b6b;box-shadow:0 0 6px #ff6b6b;}
+.step-item.done .step-dot{background:#4caf50;}
+.step-item.waiting .step-dot{background:var(--gold);box-shadow:0 0 6px var(--gold);}
+.step-icon{font-size:14px;flex-shrink:0;}
+.step-name{flex:1;font-weight:600;}
+.step-time{font-size:10px;color:var(--text3);white-space:nowrap;}
+
+/* Status bar */
+.status-bar{
+  background:var(--panel2);border:1px solid var(--border2);border-radius:6px;
+  padding:10px 14px;margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;
+}
+.status-dot{
+  width:8px;height:8px;border-radius:50%;background:#555;flex-shrink:0;
+}
+.status-dot.running{background:#ff6b6b;box-shadow:0 0 6px #ff6b6b;animation:blink .8s infinite;}
+.status-dot.done{background:var(--green);}
+.status-dot.error{background:var(--red);}
+.status-text{font-size:12px;flex:1;color:var(--text);}
+.loop-badge{
+  background:var(--border2);color:var(--text2);font-size:10px;
+  padding:2px 8px;border-radius:10px;white-space:nowrap;
+}
+
+/* Run controls */
+.run-controls{display:flex;gap:8px;}
+.run-controls .btn{flex:1;padding:12px;font-size:13px;}
+.btn-run{
+  background:linear-gradient(135deg,#8b2020,#ff4444);
+  color:#fff;font-size:14px;letter-spacing:1px;
+}
+.btn-run:hover{background:linear-gradient(135deg,#ff4444,#ff6b6b);}
+.btn-run:disabled{background:var(--border2);color:var(--text3);}
+.btn-stop-auto{background:linear-gradient(135deg,#333,#555);color:var(--text);}
+.btn-stop-auto:hover{background:linear-gradient(135deg,#555,#777);}
+
+/* Progress bar */
+.progress-wrap{margin-bottom:10px;}
+.progress-label{font-size:10px;color:var(--text3);margin-bottom:4px;display:flex;justify-content:space-between;}
+.progress-bar{height:4px;background:var(--border2);border-radius:2px;overflow:hidden;}
+.progress-inner{height:100%;background:linear-gradient(90deg,#8b2020,#ff4444);border-radius:2px;transition:width .3s;}
+
+/* Warning box */
+.warn-box{
+  background:#1a1200;border:1px solid var(--gold-dim);border-radius:6px;
+  padding:10px 12px;margin-bottom:14px;font-size:11px;line-height:1.7;
+  color:var(--text2);
+}
+.warn-box strong{color:var(--gold);}
+
+/* ── IFRAME (snipe) ── */
+#snipeFrame{
+  width:100%;height:100%;border:none;
+  background:var(--bg);
+}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
+  background:#1e2030;border:1px solid var(--gold-dim);color:var(--gold);
+  padding:8px 18px;border-radius:20px;font-size:12px;z-index:9999;
+  opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;
+  max-width:90vw;text-overflow:ellipsis;overflow:hidden;
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>MHXX SNIPE</h1>
+  <span class="sub">リセマラ・スナイプ統合</span>
+  <span class="bt-dot" id="btDot" title="未接続"></span>
+</div>
+
+<!-- MAIN TAB BAR -->
+<div class="main-tabs">
+  <div class="main-tab active" onclick="switchTab('connect')">🔗 接続</div>
+  <div class="main-tab tab-reset" onclick="switchTab('resetmara')">🔄 リセマラ</div>
+  <div class="main-tab tab-snipe" onclick="switchTab('snipe')">🎯 スナイプ</div>
+  <div class="main-tab tab-capture" onclick="switchTab('capture')">📺 画面</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     TAB 1: 接続
+═══════════════════════════════════════════════════════════════════ -->
+<div class="tab-page active" id="tab-connect">
+  <div class="scroll-wrap">
+
+    <div class="panel-block">
+      <div class="sec-title blue">接続状態</div>
+      <div class="bt-status-card">
+        <div class="bt-status-row">
+          <div class="bt-status-icon" id="btIcon">🔌</div>
+          <div class="bt-status-info">
+            <div class="label">TCP / sys-botbase STATUS</div>
+            <div class="val" id="btStatusText">未接続</div>
+            <div class="mac" id="btMacDisplay">--</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec-title blue">Switch に接続 (sys-botbase)</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.7;">
+        ① Switch に Homebrew + sys-botbase をインストール<br>
+        ② Switch とスマホを同じ WiFi に接続<br>
+        ③ Switch の IP アドレスを入力して接続
+      </div>
+      <div class="mac-input-row" style="flex-wrap:wrap;gap:6px;">
+        <input type="text" class="mac-input" id="switchIpInput"
+          placeholder="192.168.1.100" style="min-width:130px;flex:2;" inputmode="numeric">
+        <input type="number" class="mac-input" id="switchPortInput"
+          placeholder="6000" value="6000" style="width:72px;flex:none;" min="1" max="65535">
+        <button class="btn btn-blue" onclick="connectSwitch()">接続</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="btn btn-red btn-sm" onclick="disconnectSwitch()" id="btnDisconnect" disabled>切断</button>
+        <div style="flex:1;font-size:10px;color:var(--text3);padding:6px 0;">
+          sys-botbase:
+          <a href="https://github.com/olliz0r/sys-botbase" style="color:var(--accent2);">
+            github.com/olliz0r/sys-botbase
+          </a>　デフォルトポート: 6000
+        </div>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="panel-block">
+      <div class="sec-title">アプリ情報</div>
+      <div style="font-size:11px;color:var(--text2);line-height:1.8;">
+        <div>🔄 <strong style="color:var(--gold)">リセマラタブ</strong> … マカフシギ錬金術リセマラ全自動化</div>
+        <div>🎯 <strong style="color:var(--teal)">スナイプタブ</strong> … お守りスナイプ検索・タイマー</div>
+        <div style="margin-top:8px;color:var(--text3);">
+          接続後にリセマラタブを開いてください。<br>
+          スナイプタブは接続なしでも使用できます。
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     TAB 2: リセマラ自動化
+═══════════════════════════════════════════════════════════════════ -->
+<div class="tab-page" id="tab-resetmara">
+  <div class="scroll-wrap">
+
+    <!-- Warning -->
+    <div class="panel-block">
+      <div class="warn-box">
+        <strong>⚠ 使用前の確認</strong><br>
+        Switch に sys-botbase を導入し、接続タブで接続してください。<br>
+        ゲームを<strong>ホーム画面</strong>に戻した状態で「実行開始」を押してください。<br>
+        各待機時間はロード速度に合わせて調整してください。
+      </div>
+    </div>
+
+    <!-- Config -->
+    <div class="panel-block">
+      <div class="sec-title red">自動化設定</div>
+
+      <div class="auto-config-grid">
+        <div class="config-item">
+          <label>キャラ確認待機時間 (秒)</label>
+          <input type="number" id="userWaitInput" value="2.0" min="0" max="30" step="0.5">
+          <div style="font-size:10px;color:var(--text3);margin-top:3px;">
+            セーブデータ選択→キャラ確認「はい」まで
+          </div>
+        </div>
+        <div class="config-item">
+          <label>ループ回数 (0=無限)</label>
+          <input type="number" id="loopCountInput" value="0" min="0" max="9999" step="1">
+          <div style="font-size:10px;color:var(--text3);margin-top:3px;">
+            0を設定すると無限ループ
+          </div>
+        </div>
+      </div>
+
+      <!-- Run controls -->
+      <div class="run-controls">
+        <button class="btn btn-run" id="btnRun" onclick="startResetmara()">▶ 実行開始</button>
+        <button class="btn btn-stop-auto btn-sm" id="btnStopAuto" onclick="stopResetmara()" disabled
+          style="flex:0;min-width:70px;">⏹ 停止</button>
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div class="panel-block">
+      <div class="sec-title red">実行状態</div>
+
+      <div class="status-bar" id="statusBar">
+        <div class="status-dot" id="statusDot"></div>
+        <div class="status-text" id="statusText">待機中</div>
+        <div class="loop-badge" id="loopBadge">ループ: 0</div>
+      </div>
+
+      <!-- Countdown Timer -->
+      <div class="timer-box" id="timerBox">
+        <div class="timer-label">⏱ キャラ確認タイマー</div>
+        <div class="timer-value" id="timerValue">--.-</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:4px;" id="timerSub">
+          ユーザー選択後カウント開始
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span id="progressLabel">進捗</span>
+          <span id="progressPct">0%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-inner" id="progressInner" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Step list -->
+      <div class="step-list" id="stepList">
+        <div class="step-item" data-step="0">
+          <div class="step-dot"></div>
+          <div class="step-icon">🎮</div>
+          <div class="step-name">GameStart</div>
+          <div class="step-time">~32s</div>
+        </div>
+        <div class="step-item" data-step="1">
+          <div class="step-dot"></div>
+          <div class="step-icon">🏃</div>
+          <div class="step-name">マカ錬金師へ移動</div>
+          <div class="step-time">~4s</div>
+        </div>
+        <div class="step-item" data-step="2">
+          <div class="step-dot"></div>
+          <div class="step-icon">⚗️</div>
+          <div class="step-name">マカフシギ錬金術を依頼</div>
+          <div class="step-time">~5s</div>
+        </div>
+        <div class="step-item" data-step="3">
+          <div class="step-dot"></div>
+          <div class="step-icon">🏃</div>
+          <div class="step-name">受付嬢へ移動</div>
+          <div class="step-time">~4s</div>
+        </div>
+        <div class="step-item" data-step="4">
+          <div class="step-dot"></div>
+          <div class="step-icon">📋</div>
+          <div class="step-name">クエスト受注・出発</div>
+          <div class="step-time">~25s</div>
+        </div>
+        <div class="step-item" data-step="5">
+          <div class="step-dot"></div>
+          <div class="step-icon">✅</div>
+          <div class="step-name">クエストクリア (角納品)</div>
+          <div class="step-time">~38s</div>
+        </div>
+        <div class="step-item" data-step="6">
+          <div class="step-dot"></div>
+          <div class="step-icon">💰</div>
+          <div class="step-name">報酬全売却 / セーブ拒否</div>
+          <div class="step-time">~17s</div>
+        </div>
+        <div class="step-item" data-step="7">
+          <div class="step-dot"></div>
+          <div class="step-icon">🔁</div>
+          <div class="step-name">ソフトリセット</div>
+          <div class="step-time">~6s</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     TAB 3: スナイプ (snipe.html iframe)
+═══════════════════════════════════════════════════════════════════ -->
+<div class="tab-page" id="tab-snipe">
+  <iframe id="snipeFrame" src="file:///android_asset/snipe.html" allowfullscreen></iframe>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     TAB 4: 画面キャプチャ (SysDVR)
+═══════════════════════════════════════════════════════════════════ -->
+<div class="tab-page" id="tab-capture">
+  <div class="scroll-wrap">
+
+    <!-- SysDVR 接続ステータス -->
+    <div class="panel-block">
+      <div class="sec-title teal">📺 画面キャプチャ / SysDVR</div>
+      <div class="bt-status-card" id="captureStatusCard">
+        <div class="bt-status-row">
+          <div class="bt-status-icon">📡</div>
+          <div class="bt-status-info">
+            <div class="label">SYSDVR STATUS</div>
+            <div class="val" id="captureStatusText">未起動</div>
+            <div class="mac" id="captureIpDisplay">port 9911 (TCP Bridge)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- IP 入力 (接続タブと連動) -->
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;">
+        ※ 接続タブの Switch IP を自動使用します。SysDVR を TCP Bridge モードで起動してください。
+      </div>
+      <div class="mac-input-row" style="margin-bottom:10px;">
+        <input type="text" class="mac-input" id="capIpInput" placeholder="Switch IP (例: 192.168.1.100)"
+               style="flex:1;" oninput="updateCaptureIp()">
+      </div>
+
+      <button class="btn" id="btnLaunchCapture"
+              style="width:100%;background:linear-gradient(135deg,#1a3a4a,#1e4d5a);
+                     color:var(--teal);border:1px solid var(--teal);font-size:13px;padding:12px;"
+              onclick="launchCapture()">
+        📺 画面キャプチャを開く
+      </button>
+    </div>
+
+    <!-- 機能説明 -->
+    <div class="panel-block">
+      <div class="sec-title">機能説明</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.8;">
+        <div style="margin-bottom:6px;">
+          <span style="color:var(--teal);">■ 無限キャプチャ</span><br>
+          停止ボタンを押すまで Switch 画面をリアルタイム表示
+        </div>
+        <div style="margin-bottom:6px;">
+          <span style="color:var(--teal);">■ 120fps 表示</span><br>
+          スマホが 120Hz 対応の場合、高リフレッシュレートで表示
+        </div>
+        <div style="margin-bottom:6px;">
+          <span style="color:var(--gold);">■ 録画</span><br>
+          H264 → MP4 形式で /Movies/SysDVR/ に保存
+        </div>
+        <div style="margin-bottom:6px;">
+          <span style="color:var(--gold);">■ 操作録画</span><br>
+          録画中のボタン/スティック操作をタイムスタンプ付きで自動記録
+        </div>
+        <div style="margin-bottom:6px;">
+          <span style="color:var(--purple);">■ フィードバックループ再生</span><br>
+          録画した操作を同じタイミングで自動再実行。繰り返しスナイプに最適
+        </div>
+        <div>
+          <span style="color:var(--accent2);">■ 動画インポート</span><br>
+          ストレージ内 .mp4 を選択 → 同名 .json の操作データを読み込んで再生可能
+        </div>
+      </div>
+    </div>
+
+    <!-- 使い方 -->
+    <div class="panel-block">
+      <div class="sec-title green">使い方 (フィードバックループ)</div>
+      <div style="font-size:11px;color:var(--text2);line-height:1.9;">
+        <span style="color:var(--text3);">①</span> SysDVR を Switch で TCP Bridge モード起動<br>
+        <span style="color:var(--text3);">②</span> 接続タブで Switch に接続<br>
+        <span style="color:var(--text3);">③</span> このタブの「画面キャプチャを開く」をタップ<br>
+        <span style="color:var(--text3);">④</span> キャプチャ画面で <span style="color:#dc3545;">⏺ 録画</span> を開始<br>
+        <span style="color:var(--text3);">⑤</span> BTタブやスナイプタブで通常操作<br>
+        <span style="color:var(--text3);">⑥</span> <span style="color:#dc3545;">⏹ 停止</span> で録画終了 → 操作データ自動保存<br>
+        <span style="color:var(--text3);">⑦</span> <span style="color:var(--teal);">▶ 再生</span> で同じ操作をループ再実行
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SCRIPT
+═══════════════════════════════════════════════════════════════════ -->
+<script>
+/* ─────────────────────────────────────────────────────────────────
+   ENVIRONMENT DETECTION
+───────────────────────────────────────────────────────────────── */
+const isAndroid = !!(window.AndroidBridge && window.AndroidBridge.isAndroid?.());
+
+function ab(method, ...args) {
+  if (window.AndroidBridge && window.AndroidBridge[method]) {
+    return window.AndroidBridge[method](...args);
+  }
+}
+window.ab = ab;
+
+/* ─────────────────────────────────────────────────────────────────
+   TAB NAVIGATION
+───────────────────────────────────────────────────────────────── */
+function switchTab(name) {
+  document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  const tabs = document.querySelectorAll('.main-tab');
+  const tabMap = { connect: 0, resetmara: 1, snipe: 2, capture: 3 };
+  const idx = tabMap[name];
+  if (idx !== undefined) tabs[idx].classList.add('active');
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   CONNECTION
+───────────────────────────────────────────────────────────── */
+let btConnected = false;
+
+window.onConnectionStatus = function(status, msg) { updateBtStatus(status, msg); };
+window.onBtStatus = window.onConnectionStatus;
+
+function validateIp(ip) {
+  return /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(ip);
+}
+
+function connectSwitch() {
+  const ip   = (document.getElementById('switchIpInput').value || '').trim();
+  const port = parseInt(document.getElementById('switchPortInput').value || '6000', 10);
+  if (!ip || !validateIp(ip)) { showToast('⚠ 有効なIPアドレスを入力してください'); return; }
+  if (isNaN(port) || port < 1 || port > 65535) { showToast('⚠ ポート番号が無効です'); return; }
+  if (isAndroid) {
+    AndroidBridge.connectSwitch(ip, port);
+  } else {
+    setTimeout(() => updateBtStatus('connected', `接続成功 (プレビュー) ${ip}:${port}`), 800);
+  }
+}
+
+function disconnectSwitch() {
+  if (isAndroid) AndroidBridge.disconnectSwitch();
+  updateBtStatus('disconnected', '切断しました');
+}
+
+function updateBtStatus(status, msg) {
+  const dot  = document.getElementById('btDot');
+  const icon = document.getElementById('btIcon');
+  const text = document.getElementById('btStatusText');
+  const info = document.getElementById('btMacDisplay');
+  const btn  = document.getElementById('btnDisconnect');
+  dot.className = 'bt-dot';
+  switch (status) {
+    case 'connected':
+      dot.classList.add('connected'); icon.textContent = '🟢';
+      text.textContent = '接続中 (sys-botbase)';
+      info.textContent = document.getElementById('switchIpInput').value + ':' +
+                         document.getElementById('switchPortInput').value;
+      btConnected = true; btn.disabled = false; break;
+    case 'connecting':
+      dot.classList.add('connecting'); icon.textContent = '🔄';
+      text.textContent = msg || '接続中...'; btConnected = false; btn.disabled = true; break;
+    case 'disconnected':
+      icon.textContent = '🔌'; text.textContent = '未接続';
+      info.textContent = '--'; btConnected = false; btn.disabled = true; break;
+    case 'error':
+      dot.classList.add('error'); icon.textContent = '❌';
+      text.textContent = msg || 'エラー'; btConnected = false; btn.disabled = true; break;
+  }
+  if (msg) showToast(msg);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   AUTOMATION ENGINE
+   Arduino コードをそのまま sys-botbase TCP コマンドに変換
+   ※ pressButton(btn, holdMs, waitMs) → press/release + delay
+───────────────────────────────────────────────────────────────── */
+
+// ── 定数 (Arduino と同値) ──
+const PRESS_SHORT = 80;   // 通常短押し ms
+const PRESS_LONG  = 200;  // 重要操作長押し ms
+const BUF         = 500;  // ロードバッファ ms
+
+// スティック正規化 (Arduino 0-255, center=128 → -1.0〜1.0)
+const normalize = v => Math.max(-1, Math.min(1, (v - 128) / 127));
+const STICK_DIAG_N = normalize(200);  // ≈ +0.567
+const STICK_MAX_N  = 1.0;
+const STICK_MIN_N  = -1.0;
+
+// ── 実行制御 ──
+let autoRunning   = false;
+let autoAbort     = false;
+let autoLoopCount = 0;
+
+// ── タイマー制御 ──
+let countdownInterval = null;
+let countdownRemain   = 0;
+
+// ── ステップ制御 ──
+const STEPS = ['GameStart','GotoKarenkin','Karenkin','GotoUketsukeJo','QuestAccept','QuestClear','RewardProcess','GameReset'];
+let currentStep = -1;
+
+// ─────────────────────────────────
+//  ユーティリティ
+// ─────────────────────────────────
+
+/** ms ミリ秒待機 (abort チェック付き) */
+function sleep(ms) {
+  return new Promise((resolve, reject) => {
+    if (autoAbort) { reject(new Error('abort')); return; }
+    const id = setTimeout(() => {
+      if (autoAbort) reject(new Error('abort'));
+      else resolve();
+    }, ms);
+    // abort 時に強制 reject できるよう window にタイマーIDを持たせる
+    window._currentSleepTimer = id;
+  });
+}
+
+/**
+ * ボタンを押して離す
+ * @param {string} btn   - ボタン名 (A/B/X/Y/L/R/ZL/ZR/PLUS/MINUS/HOME/UP/DOWN/LEFT/RIGHT)
+ * @param {number} holdMs - 押下時間 (ms)
+ * @param {number} waitMs - 離した後の待機 (ms)
+ */
+async function pressButton(btn, holdMs, waitMs) {
+  if (autoAbort) throw new Error('abort');
+  if (isAndroid && window.AndroidBridge) {
+    AndroidBridge.pressButton(btn, holdMs);
+  }
+  await sleep(holdMs + waitMs);
+}
+
+/**
+ * 十字キーを押して離す
+ * @param {string} dir   - UP/DOWN/LEFT/RIGHT
+ */
+async function pressDpad(dir, holdMs, waitMs) {
+  return pressButton(dir, holdMs, waitMs);
+}
+
+/**
+ * スティックを傾けてダッシュ移動
+ * @param {number} lx      - スティック X (-1〜1)
+ * @param {number} ly      - スティック Y (-1〜1, 上=-1, 下=+1)
+ * @param {boolean} rBtn   - R ボタン同時押し (ダッシュ)
+ * @param {number} holdMs  - 保持時間 (ms)
+ */
+async function moveStick(lx, ly, rBtn, holdMs) {
+  if (autoAbort) throw new Error('abort');
+  if (isAndroid && window.AndroidBridge) {
+    if (rBtn) AndroidBridge.pressButton('R', holdMs + 200);
+    AndroidBridge.tiltStick('L', lx, ly, holdMs);
+  }
+  await sleep(holdMs + 200);
+}
+
+// ─────────────────────────────────
+//  Step 1: GameStart
+//  ホーム画面 → 村到着 (総計 ~32s + userWaitMs)
+// ─────────────────────────────────
+async function gameStart(userWaitMs) {
+  setStepUI(0, 'active', 'ゲーム起動中...');
+  setProgress(0, 8, 'ゲーム起動');
+
+  // ソフト起動 → ロゴ〜警告画面 (~14秒)
+  setStatus('ソフト起動中...');
+  await pressButton('A', PRESS_SHORT, 14000);
+
+  // タイトル画面 → A で続ける → データ選択画面表示 (~2秒)
+  setStatus('タイトル画面...');
+  await pressButton('A', PRESS_SHORT, 2000);
+
+  // セーブデータ選択 → A を押す → タイマー開始
+  setStatus('セーブデータ選択 → タイマー開始');
+  await pressButton('A', PRESS_SHORT, 0); // 押して即座に次へ
+
+  // ── タイマーカウントダウン開始 ──
+  startCountdown(userWaitMs, async () => {
+    // タイマーが 0 になったとき → キャラ確認「はい」を押す
+    setStatus('キャラ確認「はい」を押します');
+    if (isAndroid && window.AndroidBridge) {
+      AndroidBridge.pressButton('A', PRESS_SHORT);
+    }
+  });
+
+  // userWaitMs 分待機 (データ選択→キャラ確認の間)
+  await sleep(userWaitMs);
+
+  // キャラ確認後のロード → 村へ (~13秒)
+  setStatus('ロード中（村へ）...');
+  await sleep(13000 + BUF);
+
+  setStepUI(0, 'done');
+}
+
+// ─────────────────────────────────
+//  Step 2: GotoKarenkin
+//  村スタート → マカ錬金師前 (右下ダッシュ ~4秒)
+// ─────────────────────────────────
+async function gotoKarenkin() {
+  setStepUI(1, 'active', 'マカ錬金師へ移動中...');
+  setProgress(1, 8, 'マカ錬金師へ移動');
+  // 右下(南東)方向ダッシュ (R ボタン同時押し) 4秒
+  await moveStick(STICK_MAX_N, STICK_DIAG_N, true, 4000);
+  await sleep(500);
+  setStepUI(1, 'done');
+}
+
+// ─────────────────────────────────
+//  Step 3: Karenkin
+//  マカフシギ錬金術を依頼
+// ─────────────────────────────────
+async function karenkin() {
+  setStepUI(2, 'active', 'マカ錬金師に話しかけ...');
+  setProgress(2, 8, 'マカ錬金依頼');
+
+  await pressButton('A', PRESS_SHORT, 1000);  // 話しかける
+  await pressButton('A', PRESS_SHORT, 800);   // 「護石錬金」を選択
+  await pressDpad('DOWN', PRESS_SHORT, 200);  // 「マカフシギ錬金術」へカーソル
+  await pressButton('A', PRESS_SHORT, 2000);  // 依頼確定・会話終了待機
+  await sleep(500);
+
+  setStepUI(2, 'done');
+}
+
+// ─────────────────────────────────
+//  Step 4: GotoUketsukeJo
+//  受付嬢へ移動 (右上ダッシュ ~4秒)
+// ─────────────────────────────────
+async function gotoUketsukeJo() {
+  setStepUI(3, 'active', '受付嬢へ移動中...');
+  setProgress(3, 8, '受付嬢へ移動');
+  // 右上(北東)ダッシュ (R ボタン同時押し) 4秒
+  await moveStick(STICK_MAX_N, STICK_MAX_N, true, 4000);
+  await sleep(500);
+  setStepUI(3, 'done');
+}
+
+// ─────────────────────────────────
+//  Step 5: QuestAccept
+//  クエスト受注 → 出発
+// ─────────────────────────────────
+async function questAccept() {
+  setStepUI(4, 'active', 'クエスト受注中...');
+  setProgress(4, 8, 'クエスト受注');
+
+  await pressButton('A', PRESS_SHORT, 1500);             // 受付嬢に話しかける
+  await pressButton('A', PRESS_SHORT, 1000);             // クエスト一覧を開く
+  await pressDpad('DOWN', PRESS_SHORT, 200);             // 「森の中のケルビ」へ移動
+  await pressButton('A', PRESS_SHORT, 2000);             // 受注決定・受注演出待ち
+
+  // 出発口へ移動 (左上)
+  await moveStick(STICK_MIN_N, STICK_MAX_N, true, 3000);
+
+  await pressButton('A', PRESS_SHORT, 2000);             // エリア移動（出発）
+  setStatus('クエスト内容確認中...');
+  await sleep(8000 + BUF);                               // ロード〜クエスト開始
+
+  setStepUI(4, 'done');
+}
+
+// ─────────────────────────────────
+//  Step 6: QuestClear
+//  ケルビの角を納品 → クリア
+// ─────────────────────────────────
+async function questClear() {
+  setStepUI(5, 'active', 'クエスト中...');
+  setProgress(5, 8, 'クエストクリア');
+
+  await pressButton('PLUS', PRESS_SHORT, 500);   // + でメニューを開く
+  await pressButton('A', PRESS_SHORT, 500);      // アイテムポーチを開く
+  await pressButton('A', PRESS_SHORT, 200);      // ケルビの角を選択
+  await pressButton('A', PRESS_SHORT, 1000);     // 納品確定
+
+  // クエストクリア演出〜ロード (~35秒)
+  setStatus('クエストクリア待機中...');
+  await sleep(35000 + BUF);
+
+  setStepUI(5, 'done');
+}
+
+// ─────────────────────────────────
+//  Step 7: RewardProcess
+//  報酬全売却 & セーブ拒否
+// ─────────────────────────────────
+async function rewardProcess() {
+  setStepUI(6, 'active', '報酬処理中...');
+  setProgress(6, 8, '報酬処理');
+
+  // 報酬確認待機
+  await sleep(1000);
+
+  // X → 全売却
+  await pressButton('X', PRESS_SHORT, 500);
+
+  // A → 売却確定
+  await pressButton('A', PRESS_SHORT, 3000);
+
+  // B → 「いいえ」選択 (セーブ拒否)
+  await pressButton('B', PRESS_SHORT, 300);
+
+  // 村へ戻るロード (~8秒)
+  setStatus('村へ戻り中...');
+  await sleep(8000 + BUF);
+
+  setStepUI(6, 'done');
+}
+
+// ─────────────────────────────────
+//  Step 8: GameReset
+//  ソフトリセット
+// ─────────────────────────────────
+async function gameReset() {
+  setStepUI(7, 'active', 'リセット中...');
+  setProgress(7, 8, 'ソフトリセット');
+
+  await pressButton('HOME', PRESS_SHORT, 2000);  // HOMEボタン → ホーム画面へ
+  await pressButton('X', PRESS_SHORT, 1000);     // ソフト終了メニュー
+  await pressButton('A', PRESS_SHORT, 3000);     // 終了確定
+  await sleep(1000);                             // 完全終了待ち
+
+  setStepUI(7, 'done');
+}
+
+// ─────────────────────────────────
+//  メインループ
+// ─────────────────────────────────
+async function resetmaraLoop() {
+  const userWaitMs = Math.round(
+    (parseFloat(document.getElementById('userWaitInput').value) || 2) * 1000
+  );
+  const maxLoops = parseInt(document.getElementById('loopCountInput').value) || 0;
+
+  autoLoopCount = 0;
+
+  while (!autoAbort) {
+    autoLoopCount++;
+    document.getElementById('loopBadge').textContent = `ループ: ${autoLoopCount}`;
+    if (maxLoops > 0 && autoLoopCount > maxLoops) break;
+
+    // リセット全ステップの表示をリセット
+    resetAllSteps();
+
+    try {
+      await gameStart(userWaitMs);
+      if (autoAbort) break;
+
+      await gotoKarenkin();
+      if (autoAbort) break;
+
+      await karenkin();
+      if (autoAbort) break;
+
+      await gotoUketsukeJo();
+      if (autoAbort) break;
+
+      await questAccept();
+      if (autoAbort) break;
+
+      await questClear();
+      if (autoAbort) break;
+
+      await rewardProcess();
+      if (autoAbort) break;
+
+      await gameReset();
+      if (autoAbort) break;
+
+    } catch (e) {
+      if (e.message === 'abort') break;
+      setStatus('エラー: ' + e.message, 'error');
+      showToast('❌ エラー: ' + e.message);
+      break;
+    }
+  }
+
+  finishAuto();
+}
+
+// ─────────────────────────────────
+//  開始 / 停止
+// ─────────────────────────────────
+function startResetmara() {
+  if (autoRunning) return;
+  if (!btConnected && isAndroid) {
+    showToast('⚠ Switch に接続してから実行してください');
+    switchTab('connect');
+    return;
+  }
+
+  autoRunning = true;
+  autoAbort   = false;
+
+  document.getElementById('btnRun').disabled     = true;
+  document.getElementById('btnStopAuto').disabled = false;
+
+  const dot = document.getElementById('statusDot');
+  dot.className = 'status-dot running';
+  setStatus('実行中...', 'running');
+
+  showToast('▶ リセマラ自動化を開始しました');
+
+  resetmaraLoop();
+}
+
+function stopResetmara() {
+  autoAbort = true;
+  if (window._currentSleepTimer) clearTimeout(window._currentSleepTimer);
+  stopCountdown();
+  showToast('⏹ 停止リクエスト送信');
+  setStatus('停止中...', 'stopping');
+}
+
+function finishAuto() {
+  autoRunning = false;
+  document.getElementById('btnRun').disabled      = false;
+  document.getElementById('btnStopAuto').disabled = true;
+  const dot = document.getElementById('statusDot');
+  dot.className = autoAbort ? 'status-dot' : 'status-dot done';
+  setStatus(autoAbort ? '停止しました' : `完了 (${autoLoopCount}ループ)`, autoAbort ? 'idle' : 'done');
+  stopCountdown();
+  showToast(autoAbort ? '⏹ リセマラ停止' : `✅ リセマラ完了 (${autoLoopCount}ループ)`);
+}
+
+// ─────────────────────────────────
+//  カウントダウンタイマー
+// ─────────────────────────────────
+function startCountdown(ms, onComplete) {
+  stopCountdown();
+  countdownRemain = ms;
+
+  const timerBox = document.getElementById('timerBox');
+  const timerVal = document.getElementById('timerValue');
+  const timerSub = document.getElementById('timerSub');
+
+  timerBox.classList.add('active');
+  timerVal.className = 'timer-value counting';
+  timerSub.textContent = 'カウントダウン中...';
+
+  const start = Date.now();
+  const end   = start + ms;
+
+  countdownInterval = setInterval(() => {
+    const remain = end - Date.now();
+    if (remain <= 0) {
+      timerVal.textContent = '0.0';
+      timerVal.className   = 'timer-value done';
+      timerSub.textContent = '✅ キャラ確認「はい」を送信';
+      timerBox.classList.remove('active');
+      stopCountdown();
+      if (onComplete) onComplete();
+    } else {
+      timerVal.textContent = (remain / 1000).toFixed(1);
+    }
+  }, 100);
+
+  // 即座に表示
+  timerVal.textContent = (ms / 1000).toFixed(1);
+}
+
+function stopCountdown() {
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+  if (!autoRunning) {
+    const timerBox = document.getElementById('timerBox');
+    const timerVal = document.getElementById('timerValue');
+    const timerSub = document.getElementById('timerSub');
+    timerBox.classList.remove('active');
+    timerVal.className   = 'timer-value';
+    timerVal.textContent = '--.-';
+    timerSub.textContent = 'ユーザー選択後カウント開始';
+  }
+}
+
+// ─────────────────────────────────
+//  UI ヘルパー
+// ─────────────────────────────────
+function setStatus(msg, type) {
+  const el  = document.getElementById('statusText');
+  const dot = document.getElementById('statusDot');
+  if (el) el.textContent = msg;
+  if (dot && type) {
+    dot.className = 'status-dot' + (type === 'running' ? ' running' : type === 'done' ? ' done' : type === 'error' ? ' error' : '');
+  }
+}
+
+function setStepUI(idx, state, msg) {
+  const items = document.querySelectorAll('.step-item');
+  if (items[idx]) {
+    items[idx].className = 'step-item ' + state;
+  }
+  if (msg) setStatus(msg);
+}
+
+function resetAllSteps() {
+  document.querySelectorAll('.step-item').forEach(el => {
+    el.className = 'step-item';
+  });
+}
+
+function setProgress(step, total, label) {
+  const pct = Math.round((step / total) * 100);
+  document.getElementById('progressInner').style.width = pct + '%';
+  document.getElementById('progressPct').textContent   = pct + '%';
+  document.getElementById('progressLabel').textContent = label || '';
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   TOAST
+───────────────────────────────────────────────────────────────── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => t.style.opacity = '0', 2500);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   IFRAME BRIDGE
+   snipe.html の _parentAb() が window.parent.AndroidBridge を
+   呼び出すため、ここで参照を確保しておく
+───────────────────────────────────────────────────────────────── */
+// snipe.html iframe 読み込み完了後、接続状態を伝達
+document.getElementById('snipeFrame').addEventListener('load', function() {
+  try {
+    const fw = this.contentWindow;
+    if (fw && fw.onConnectionStatus && btConnected) {
+      fw.onConnectionStatus('connected', '接続済み (親フレームから)');
+    }
+  } catch(e) {}
+});
+
+/* ─────────────────────────────────────────────────────────────────
+   画面キャプチャ (SysDVR) TAB
+───────────────────────────────────────────────────────────────── */
+function updateCaptureIp() {
+  const ip = document.getElementById('capIpInput').value.trim();
+  document.getElementById('captureIpDisplay').textContent =
+    ip ? ip + ':9911' : 'port 9911 (TCP Bridge)';
+}
+
+// 接続タブの IP が変わったら自動反映
+function syncCaptureIp(ip) {
+  const el = document.getElementById('capIpInput');
+  if (el && !el.value) {
+    el.value = ip;
+    updateCaptureIp();
+  }
+}
+
+function launchCapture() {
+  const ipEl = document.getElementById('capIpInput');
+  const ip = (ipEl && ipEl.value.trim()) ||
+             (document.getElementById('switchIpInput') &&
+              document.getElementById('switchIpInput').value.trim()) || '';
+
+  const btn = document.getElementById('btnLaunchCapture');
+  btn.disabled = true;
+  btn.textContent = '起動中...';
+
+  if (ip) {
+    ab('launchCaptureWithIp', ip);
+  } else {
+    ab('launchCapture');
+  }
+
+  // Re-enable after 2s
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.textContent = '📺 画面キャプチャを開く';
+  }, 2000);
+}
+
+window.onCaptureStatus = function(status, msg) {
+  const el = document.getElementById('captureStatusText');
+  if (!el) return;
+  el.textContent = msg || status;
+  const card = document.getElementById('captureStatusCard');
+  if (card) {
+    card.style.borderColor = status === 'error' ? 'var(--red)' : 'var(--teal)';
+  }
+};
+
+// 接続成功時に IP を capture タブに反映
+const _origOnConnectionStatus = window.onConnectionStatus;
+window.onConnectionStatus = function(status, msg) {
+  if (_origOnConnectionStatus) _origOnConnectionStatus(status, msg);
+  if (status === 'connected') {
+    const ip = document.getElementById('switchIpInput')?.value?.trim();
+    if (ip) syncCaptureIp(ip);
+  }
+};
+</script>
+</body>
+</html>

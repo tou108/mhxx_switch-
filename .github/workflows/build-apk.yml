@@ -1,0 +1,50 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. リポジトリをチェックアウト
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Java 17 セットアップ
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # 3. Gradle 8.4 をインストール (wrapper jar も生成するために必要)
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.4'
+
+      # 4. gradle-wrapper.jar を生成 (リポジトリにjarが含まれていないため)
+      - name: Generate Gradle Wrapper
+        run: gradle wrapper --gradle-version 8.4
+
+      # 5. gradlew に実行権限
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # 6. Debug APK ビルド
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      # 7. APK をアーティファクトとして保存 (30日間ダウンロード可)
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: MHXXSnipeApp-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MHXXスナイプ</string>
+    <string name="bt_connect">Switch接続</string>
+    <string name="bt_disconnect">切断</string>
+    <string name="bt_scanning">スキャン中...</string>
+    <string name="macro_run">マクロ実行</string>
+    <string name="macro_stop">停止</string>
+</resources>
